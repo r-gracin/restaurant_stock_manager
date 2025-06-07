@@ -70,7 +70,15 @@ function FoodStock() {
   };
 
   return (
-    <div>
+    <div style={{
+            position: 'fixed    ',
+            top: 100,
+            width: '100%',
+            zIndex: 1000,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+            }}>
       <h2>Food Stock</h2>
 
       <form onSubmit={handleSubmit}>
