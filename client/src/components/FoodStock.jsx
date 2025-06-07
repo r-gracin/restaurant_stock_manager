@@ -1,34 +1,4 @@
-// function FoodStock() {
-//   return <div><h2>Food Stock Page</h2></div>;
-// }
-
-// export default FoodStock;
-
-// import axios from 'axios';
-// import { useEffect, useState } from 'react';
-
-// function FoodStock() {
-//   const [foods, setFoods] = useState([]);
-
-//   useEffect(() => {
-//     axios.get('/api/foods')  // relative path
-//       .then(res => setFoods(res.data))
-//       .catch(err => console.error(err));
-//   }, []);
-
-//   return (
-//     <div>
-//       <h2>Food Stock</h2>
-//       <ul>
-//         {foods.map(food => (
-//           <li key={food._id}>{food.name}</li>
-//         ))}
-//       </ul>
-//     </div>
-//   );
-// }
-
-// export default FoodStock;
+// OLD code
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -62,6 +32,17 @@ function FoodStock() {
       price: parseFloat(newFood.price),
       amount: parseInt(newFood.amount)
     })
+    .then(res => {
+      setFoods([...foods, res.data]); // update local list
+      setNewFood({ name: '', type: '', price: '', amount: '' }); // clear form
+    })
+    .catch(err => console.error(err));
+  };
+
+ // Handle form submission
+  const handleDelete = (e, id) => {
+    e.preventDefault();
+    axios.delete(`/api/foods/${id}`)
     .then(res => {
       setFoods([...foods, res.data]); // update local list
       setNewFood({ name: '', type: '', price: '', amount: '' }); // clear form
@@ -118,13 +99,38 @@ function FoodStock() {
         <button type="submit">Add Food</button>
       </form>
 
-      <ul>
+      {/* <ul>
         {foods.map((food) => (
           <li key={food._id}>
             {food.name} ({food.type}) - ${food.price} x {food.amount}
           </li>
         ))}
-      </ul>
+      </ul> */}
+      <table border="1" style={{ marginTop: '20px', width: '100%', borderCollapse: 'collapse' }}>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Price</th>
+            <th>Amount</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {foods.map((food) => (
+            <tr key={food.id}>
+              <td>{food.name}</td>
+              <td>{food.type}</td>
+              <td>${food.price}</td>
+              <td>{food.amount}</td>
+              <td>
+                <button onClick={() => deleteFood(food.id)}>Delete</button>
+                {/* Optional: Add update/edit functionality here */}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
