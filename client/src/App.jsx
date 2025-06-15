@@ -51,7 +51,6 @@ function App() {
         <Route path="/mealplan" element={<MealPlan />} />
         <Route path="/testcode" element={<TestCode />} />
       </Routes>
-      {/* <TestCode /> */}
     </Router>
   );
 }
