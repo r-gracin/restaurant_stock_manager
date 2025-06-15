@@ -15,16 +15,8 @@ const Navbar = () => (
     <Link to="/" style={{ color: 'white', margin: '10px' }}>Home</Link>
     <Link to="/foodstock" style={{ color: 'white', margin: '10px' }}>FoodStock</Link>
     <Link to="/mealplan" style={{ color: 'white', margin: '10px' }}>MealPlan</Link>
+    <Link to="/testcode" style={{ color: 'white', margin: '10px' }}>TestCode</Link>
   </nav>
 );
-
-
-// const Navbar = () => (
-//   <nav style={{ background: '#333', padding: '10px' }}>
-//     <Link to="/" style={{ color: 'white', margin: '10px' }}>Home</Link>
-//     <Link to="/foodstock" style={{ color: 'white', margin: '10px' }}>FoodStock</Link>
-//     <Link to="/mealplan" style={{ color: 'white', margin: '10px' }}>MealPlan</Link>
-//   </nav>
-// );
 
 export default Navbar;

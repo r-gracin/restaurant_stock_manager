@@ -4,7 +4,7 @@ const Home = () => {
   const navigate = useNavigate();
   return (
     <div  style={{
-    position: 'fixed    ',
+    position: 'fixed',
     top: 100,
     width: '100%',
     zIndex: 1000,

@@ -39,6 +39,7 @@ import Navbar from './components/Navbar';
 import Home from './components/Home';
 import FoodStock from './components/FoodStock';
 import MealPlan from './components/MealPlan';
+import TestCode from './components/TestCode';
 
 function App() {
   return (
@@ -47,8 +48,10 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/foodstock" element={<FoodStock />} />
-        <Route path="/meals" element={<MealPlan />} />
+        <Route path="/mealplan" element={<MealPlan />} />
+        <Route path="/testcode" element={<TestCode />} />
       </Routes>
+      {/* <TestCode /> */}
     </Router>
   );
 }

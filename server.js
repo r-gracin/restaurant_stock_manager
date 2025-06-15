@@ -28,11 +28,11 @@ app.use('/api', (req, res) => {
 // Serve React static files
 app.use(express.static(path.join(__dirname, 'client', 'dist')));
 
-// // Catch-all for client-side routing
-// app.use('*', (req, res) => {
-//   // res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
-//   res.send("opa");
-// });
+// Catch-all for client-side routing
+app.use('/ali', function(req, res) {
+  // res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
+  res.send("ola");
+});
 
 const PORT = process.env.PORT
 mongoose.connect(process.env.MONGO_URI, {
