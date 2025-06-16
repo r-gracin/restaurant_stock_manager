@@ -1,47 +1,36 @@
-// OLD code
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Dialog, DialogDescription, DialogHeader, DialogFooter, DialogTitle, DialogContent } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
-import React, { useEffect, useMemo, useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
-  getFilteredRowModel,
   getSortedRowModel,
-  flexRender,
-} from "@tanstack/react-table";
-import axios from "axios";
+  getFilteredRowModel,
+  getPaginationRowModel,
+} from '@tanstack/react-table';
 
-// const defaultData = [
-//   {
-//     name: 'tanner',
-//     type: 'linsley',
-//     price: 24,
-//     amount: 100,
-//   },
-//   {
-//     name: 'tandy',
-//     type: 'miller',
-//     price: 40,
-//     amount: 40,
-//   },
-//   {
-//     name: 'joe',
-//     type: 'dirte',
-//     price: 45,
-//     amount: 20,
-//   },
-// ];
+// Used for testing if backend is not working
+// import { sampleData } from './table/TableData';
+import { useTableColumns } from './table/TableColumns';
+import GlobalSearch from './table/GlobalSearch';
+import ColumnFilters from './table/ColumnFilters';
+import TableBody from './table/TableBody';
+import TablePagination from './table/TablePagination';
 
-
-function FoodStock() {
+const FoodStock = () => {
   const [foods, setFoods] = useState([]);
   const [newFood, setNewFood] = useState({
-    name: '',
-    type: '',
-    price: '',
-    amount: ''
+      name: '',
+      type: '',
+      price: '',
+      amount: ''
   });
-  const [columnFilters, setColumnFilters] = useState([]);
   const [sorting, setSorting] = useState([]);
+  const [columnFilters, setColumnFilters] = useState([]);
+  const [globalFilter, setGlobalFilter] = useState('');
+  const [deleteId, setDeleteId] = useState(null);
 
   // Load existing food stock
   useEffect(() => {
@@ -50,225 +39,170 @@ function FoodStock() {
       .catch(err => console.error(err));
   }, []);
 
-  const columns = useMemo(() => [
+  // Handle food item deletion (shows dialog box)
+  const handleDeleteClick = (foodRow) => {
+    setDeleteId(foodRow._id);
+  };
+
+  // Handle confirm of food item deletion
+  const handleConfirmDelete = () => {
+    if (deleteId !== null)
     {
-      accessorKey: "name",
-      header: () => "Name",
-      cell: info => info.getValue(),
-      filterFn: "includesString",
-    },
+      axios.delete(`/api/foods/${deleteId}`)
+      .then(() => {
+        return axios.get('/api/foods'); // re-fetch everything
+      })
+      .then(res => {
+        setFoods(res.data);
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Delete failed');
+      });
+    }
+    else
     {
-      accessorKey: "type",
-      header: () => "Type",
-      cell: info => info.getValue(),
-      filterFn: "includesString",
-    },
-    {
-      accessorKey: "price",
-      header: () => "Price",
-      cell: info => `$${info.getValue()}`,
-      filterFn: "greaterThan",
-    },
-    {
-      accessorKey: "amount",
-      header: () => "Amount",
-      cell: info => info.getValue(),
-      filterFn: "greaterThan",
-    },
-    {
-      accessorKey: "amount",
-      header: () => "Amount",
-      cell: info => info.getValue(),
-      filterFn: "greaterThan",
-    },
-  ], []);
+      alert('Missing delete ID');
+    }
+    setDeleteId(null);
+  };
+
+  // Handle cancel of food item deletion
+  const handleCancelDelete = () => {
+    setDeleteId(null);
+  };
+
+  const columns = useTableColumns(handleDeleteClick);
 
   const table = useReactTable({
-    foods,
+    data: foods,
     columns,
-    state: {
-      columnFilters,
-      sorting,
-    },
-    onColumnFiltersChange: setColumnFilters,
-    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
+    state: {
+      sorting,
+      columnFilters,
+      globalFilter,
+    },
+    initialState: {
+      pagination: {
+        pageSize: 5,
+      },
+    },
   });
 
+  const containerStyles = {
+    width: '100%',
+    fontFamily: 'Arial, sans-serif',
+    position: 'fixed',
+    top: 40
+  };
 
   // Handle form input changes
-//   const handleChange = (e) => {
-//     setNewFood({ ...newFood, [e.target.name]: e.target.value });
-//   };
+  const handleChange = (e) => {
+    setNewFood({ ...newFood, [e.target.name]: e.target.value });
+  };
 
-//   // Handle form submission
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
-//     axios.post('/api/foods', {
-//       ...newFood,
-//       price: parseFloat(newFood.price),
-//       amount: parseInt(newFood.amount)
-//     })
-//     .then(res => {
-//       setFoods([...foods, res.data]); // update local list
-//       setNewFood({ name: '', type: '', price: '', amount: '' }); // clear form
-//     })
-//     .catch(err => console.error(err));
-//   };
+  // Handle form submission
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    axios.post('/api/foods', {
+      ...newFood,
+      price: parseFloat(newFood.price),
+      amount: parseInt(newFood.amount)
+    })
+    .then(res => {
+      setFoods([...foods, res.data]); // update local list
+      setNewFood({ name: '', type: '', price: '', amount: '' }); // clear form
+    })
+    .catch(err => console.error(err));
+  };
 
-//  // Handle form submission
-//   const handleDelete = (e, id) => {
-//     e.preventDefault();
-//     axios.delete(`/api/foods/${id}`)
-//     .then(res => {
-//       setFoods([...foods, res.data]); // update local list
-//       setNewFood({ name: '', type: '', price: '', amount: '' }); // clear form
-//     })
-//     .catch(err => console.error(err));
-//   };
+  return (
+    <div style={containerStyles}>
+      <GlobalSearch
+        globalFilter={globalFilter}
+        setGlobalFilter={setGlobalFilter}
+        totalRows={table.getRowModel().rows.length}
+        filteredRows={table.getFilteredRowModel().rows.length}
+      />
+      
+      <ColumnFilters
+        columns={columns}
+        columnFilters={columnFilters}
+        setColumnFilters={setColumnFilters}
+      />
 
-//   return (
-//     <div style={{
-//             position: 'fixed    ',
-//             top: 100,
-//             width: '100%',
-//             zIndex: 1000,
-//             display: 'flex',
-//             flexDirection: 'column',
-//             alignItems: 'center'
-//             }}>
-//       <h2>Food Stock</h2>
+      <form onSubmit={handleSubmit}>
+         <input
+           type="text"
+           name="name"
+           placeholder="Name"
+           value={newFood.name}
+           onChange={handleChange}
+           required
+         />
+         <input
+           type="text"
+           name="type"
+           placeholder="Type"
+           value={newFood.type}
+           onChange={handleChange}
+           required
+         />
+         <input
+           type="number"
+           name="price"
+           placeholder="Price"
+           value={newFood.price}
+           onChange={handleChange}
+           required
+           step="0.01"
+         />
+         <input
+           type="number"
+           name="amount"
+           placeholder="Amount"
+           value={newFood.amount}
+           onChange={handleChange}
+           required
+         />
+         <button type="submit">Add Food</button>
+       </form>
+      
+      <TableBody
+        table={table}
+        columns={columns}
+      />
+      
+      <TablePagination table={table} />
 
-//       <form onSubmit={handleSubmit}>
-//         <input
-//           type="text"
-//           name="name"
-//           placeholder="Name"
-//           value={newFood.name}
-//           onChange={handleChange}
-//           required
-//         />
-//         <input
-//           type="text"
-//           name="type"
-//           placeholder="Type"
-//           value={newFood.type}
-//           onChange={handleChange}
-//           required
-//         />
-//         <input
-//           type="number"
-//           name="price"
-//           placeholder="Price"
-//           value={newFood.price}
-//           onChange={handleChange}
-//           required
-//           step="0.01"
-//         />
-//         <input
-//           type="number"
-//           name="amount"
-//           placeholder="Amount"
-//           value={newFood.amount}
-//           onChange={handleChange}
-//           required
-//         />
-//         <button type="submit">Add Food</button>
-//       </form>
+      <Dialog open={deleteId !== null} onOpenChange={setDeleteId}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+            </DialogDescription>
+          </DialogHeader>
 
-//       {/* <ul>
-//         {foods.map((food) => (
-//           <li key={food._id}>
-//             {food.name} ({food.type}) - ${food.price} x {food.amount}
-//           </li>
-//         ))}
-//       </ul> */}
-//       <table border="1" style={{ marginTop: '20px', width: '100%', borderCollapse: 'collapse' }}>
-//         <thead>
-//           <tr>
-//             <th>Name</th>
-//             <th>Type</th>
-//             <th>Price</th>
-//             <th>Amount</th>
-//             <th>Actions</th>
-//           </tr>
-//         </thead>
-//         <tbody>
-//           {foods.map((food) => (
-//             <tr key={food.id}>
-//               <td>{food.name}</td>
-//               <td>{food.type}</td>
-//               <td>${food.price}</td>
-//               <td>{food.amount}</td>
-//               <td>
-//                 <button onClick={() => deleteFood(food.id)}>Delete</button>
-//                 {/* Optional: Add update/edit functionality here */}
-//               </td>
-//             </tr>
-//           ))}
-//         </tbody>
-//       </table>
-//     </div>
-//   );
+          <p>
+            Are you sure you want to delete this row? This action cannot be undone.
+          </p>
 
-    return (
-    <div className="p-4" style={{
-            position: 'fixed    ',
-            top: 100,
-            width: '100%',
-            zIndex: 1000,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center'
-            }}>
-      <h2 className="text-2xl font-bold mb-4">Food Items</h2>
-        <table className="min-w-full border-collapse border border-gray-300">
-        <thead className="bg-gray-100">
-          {table.getHeaderGroups().map(headerGroup => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map(header => (
-                <th key={header.id} className="border px-4 py-2 cursor-pointer"
-                    onClick={header.column.getToggleSortingHandler()}>
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                  {header.column.getIsSorted() === "asc" ? " 🔼" :
-                   header.column.getIsSorted() === "desc" ? " 🔽" : ""}
-                  <div>
-                    {header.column.getCanFilter() ? (
-                      <input
-                        type="text"
-                        className="mt-1 border p-1 text-sm w-full"
-                        placeholder={`Filter ${header.column.id}`}
-                        value={
-                          (header.column.getFilterValue() ?? "")
-                        }
-                        onChange={e =>
-                          header.column.setFilterValue(e.target.value)
-                        }
-                      />
-                    ) : null}
-                  </div>
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        {/* <tbody>
-          {table.getRowModel().rows.map(row => (
-            <tr key={row.id}>
-              {row.getVisibleCells().map(cell => (
-                <td key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody> */}
-      </table>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={handleCancelDelete}>Cancel</Button>
+            <Button variant="destructive" onClick={handleConfirmDelete}>Delete</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
     </div>
   );
-}
+};
 
 export default FoodStock;
-
