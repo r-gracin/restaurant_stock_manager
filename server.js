@@ -29,9 +29,8 @@ app.use('/api', (req, res) => {
 app.use(express.static(path.join(__dirname, 'frontend', 'dist')));
 
 // Catch-all for client-side routing
-app.use('/ali', function(req, res) {
-  // res.sendFile(path.join(__dirname, 'frontend', 'dist', 'index.html'));
-  res.send("ola");
+app.get('/*splat', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend', 'dist', 'index.html'));
 });
 
 const PORT = process.env.PORT
